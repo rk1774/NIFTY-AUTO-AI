@@ -1,62 +1,48 @@
 <!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101827"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png"><title>NIFTY AUTO AI V6</title>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08111f">
+<title>NIFTY AUTO AI — Premium</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1220;--panel:#141f31;--line:#26364d;--muted:#9aabc2;--green:#28c58a;--blue:#6ba8ff;--red:#ff7272}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f4f7fb;font:15px system-ui,sans-serif}header{padding:17px;background:#101827;border-bottom:1px solid var(--line)}h1{font-size:21px;margin:0}header small,.muted,.note{color:var(--muted)}main{max-width:850px;margin:auto;padding:14px}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}.tabs button{flex:1;min-width:100px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:12px}h2{font-size:17px;margin:0 0 12px}button{border:0;border-radius:9px;padding:11px 13px;background:var(--green);color:#062219;font-weight:700}button.alt{background:#26364d;color:#eef4fc}input,select{width:100%;background:#0c1626;border:1px solid var(--line);color:white;padding:11px;border-radius:8px;margin:5px 0 12px}label{font-size:13px;color:#bdc9d9}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:#0e1929;padding:12px;border-radius:10px}.metric b{display:block;font-size:20px;margin-top:4px}.hidden{display:none}.note{font-size:12px;line-height:1.55}.good{color:var(--green)}.warn{color:#ffd27a}.bad{color:var(--red)}.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#26364d;font-size:12px}
-@media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-</style></head><body>
-<header><h1>NIFTY AUTO AI</h1><small>V6 · NIFTY 50 · Cloud-ready app prototype</small></header>
-<main>
-<nav class="tabs"><button class="alt active" data-page="dash">Dashboard</button><button class="alt" data-page="gap">Gap AI</button><button class="alt" data-page="settings">Settings</button><button class="alt" data-page="admin">Master Panel</button></nav>
-<section id="dash" class="page">
-<div class="grid">
-<div class="card metric"><span class="muted">Index</span><b>NIFTY 50</b></div>
-<div class="card metric"><span class="muted">Mode</span><b id="mode">PAPER</b></div>
-<div class="card metric"><span class="muted">Signal score</span><b>—</b></div>
-<div class="card metric"><span class="muted">Open positions</span><b>0 / 1</b></div>
+:root{--bg:#07101d;--panel:#101d30;--panel2:#14243a;--line:#243650;--text:#edf4ff;--muted:#91a4bd;--gold:#e7bd69;--green:#23c58a;--red:#ff6477;--blue:#66a7ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#1c3556 0,#0a1627 42%,var(--bg) 78%);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1120px;margin:auto;padding:18px 18px 42px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px 20px}.brand{display:flex;align-items:center;gap:12px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#f0d28c,#a8792d);display:grid;place-items:center;color:#101a2a;font-weight:900;font-size:20px;box-shadow:0 8px 24px #d5a94a30}.brand h1{font-size:18px;letter-spacing:.08em;margin:0}.brand small{display:block;color:var(--muted);font-size:11px;letter-spacing:.08em}.status{border:1px solid #6c562e;color:var(--gold);background:#2a2418;padding:7px 11px;border-radius:30px;font-size:11px;font-weight:700}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}.nav button,.btn{border:1px solid var(--line);background:#122239;color:#cbd9ec;padding:11px 12px;border-radius:12px;font-weight:700;cursor:pointer}.nav button.active{background:linear-gradient(135deg,#d8b56c,#a77b35);border-color:#e8c77f;color:#111b2b}.page{display:none}.page.active{display:block}.hero{display:grid;grid-template-columns:1.4fr .8fr;gap:14px}.card{background:linear-gradient(155deg,#14243a,#0e1a2b);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 14px 38px #0003;margin-bottom:14px}.eyebrow{color:var(--gold);font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}.big{font-size:34px;font-weight:800;letter-spacing:-.04em;margin:5px 0}.muted{color:var(--muted)}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.metric{background:#0b1727;border:1px solid var(--line);padding:13px;border-radius:14px}.metric label{display:block;color:var(--muted);font-size:11px}.metric strong{display:block;font-size:18px;margin-top:5px}.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:20px;background:#26364c;color:#d5e1f1;font-size:10px;font-weight:800}.dot{width:7px;height:7px;border-radius:50%;background:var(--green)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.btn.primary{background:linear-gradient(135deg,#d8b56c,#a77b35);color:#101a2a;border:0}.btn.success{background:#123c35;border-color:#1c735e;color:#69e0b6}.btn.danger{background:#421f2b;border-color:#743344;color:#ff9aaa}.btn:active{transform:scale(.98)}.section-title{font-size:15px;margin:0 0 12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.bar{height:8px;background:#26364b;border-radius:20px;overflow:hidden;margin:8px 0}.bar span{display:block;height:100%;width:75%;background:linear-gradient(90deg,#c49a4f,#f0d18b);border-radius:20px}.signal{display:grid;grid-template-columns:1fr 1fr;gap:10px}.signal>div{padding:13px;border-radius:14px;background:#0a1727;border:1px solid var(--line)}.signal strong{font-size:20px;display:block}.field{margin:12px 0}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}.field input,.field select{width:100%;background:#091525;color:var(--text);border:1px solid #2a3d57;border-radius:10px;padding:11px;font:inherit}.note{border-left:3px solid var(--gold);padding:10px 12px;background:#211f1a;color:#cbbd9e;border-radius:8px;font-size:11px}.table{width:100%;border-collapse:collapse}.table td,.table th{text-align:left;padding:10px 6px;border-bottom:1px solid var(--line);font-size:12px}.table th{color:var(--muted);font-weight:600}.footer{text-align:center;color:#71849d;font-size:10px;margin-top:18px}
+@media(max-width:650px){.wrap{padding:12px 12px 30px}.hero,.grid2{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.brand h1{font-size:15px}.nav{gap:5px}.nav button{padding:10px 3px;font-size:11px}.big{font-size:29px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div class="brand"><div class="logo">N</div><div><h1>NIFTY AUTO AI</h1><small>PREMIUM TRADING INTELLIGENCE · V6</small></div></div><span class="status">● PAPER MODE</span></header>
+<nav class="nav">
+<button class="active" data-tab="dashboard">Dashboard</button><button data-tab="gap">Gap AI</button><button data-tab="settings">Settings</button><button data-tab="admin">Master Panel</button>
+</nav>
+<section id="dashboard" class="page active">
+<div class="hero">
+<div class="card"><div class="eyebrow">Market overview · India</div><div class="row"><div><div class="big">NIFTY 50</div><div class="muted">Intraday · 5 minute framework</div></div><span class="pill"><i class="dot"></i> SIMULATION</span></div>
+<div class="metrics"><div class="metric"><label>Trading mode</label><strong class="gold">PAPER</strong></div><div class="metric"><label>Signal score</label><strong>— / 100</strong></div><div class="metric"><label>Open positions</label><strong>0 / 1</strong></div><div class="metric"><label>Auto trading</label><strong class="red" id="autoState">OFF</strong></div></div>
+<div class="note">अभी यह Premium UI preview है। Live market feed और Angel One broker connection उपलब्ध नहीं हैं।</div></div>
+<div class="card"><div class="eyebrow">Account snapshot</div><div class="muted">Configured capital</div><div class="big">₹25,000</div><div class="row"><span class="muted">Today's P&amp;L</span><strong>₹0.00</strong></div><div class="bar"><span style="width:0%"></span></div><div class="row"><span class="muted">Risk used</span><strong class="green">0%</strong></div></div>
 </div>
-<div class="card"><h2>Trading Controls</h2><p class="note">अभी यह UI prototype है। कोई live market feed या broker order connection नहीं है।</p>
-<p><span class="pill">Auto Trading: OFF</span> <span class="pill">Real Trading: LOCKED</span></p>
-<button id="paperOn">Paper mode ON</button> <button class="alt" id="paperOff">OFF</button>
-<p id="paperStatus" class="note">Paper preview बंद है।</p>
-<button class="alt" id="emergency">Emergency Stop (demo)</button><p id="stopStatus" class="note"></p>
-</div>
-<div class="card"><h2>Risk Guardrails</h2><div class="grid">
-<div>पूँजी <b>₹25,000</b></div><div>प्रति ट्रेड जोखिम <b>₹600</b></div><div>दैनिक नुकसान सीमा <b>₹2,000</b></div><div>अधिकतम ट्रेड <b>3 / दिन</b></div>
-</div><p class="note">एक खुली पोजीशन · न्यूनतम स्कोर 75 · Naked selling बंद · केवल defined-risk hedged selling</p></div>
+<div class="grid2"><div class="card"><h2 class="section-title">Trading controls</h2><div class="row"><span class="muted">Paper trading</span><span class="pill green">READY · DEMO</span></div><div class="actions"><button class="btn success" id="paperBtn">Paper Mode ON</button><button class="btn" id="autoBtn">Auto Trading OFF</button><button class="btn danger" id="stopBtn">Emergency Stop</button></div><p class="muted" id="controlMsg">Paper preview चालू है। कोई broker order नहीं भेजा जाता।</p></div>
+<div class="card"><h2 class="section-title">Risk guardrails</h2><div class="row"><span class="muted">Per trade risk</span><b>₹600</b></div><div class="row"><span class="muted">Daily max loss</span><b>₹2,000</b></div><div class="row"><span class="muted">Max trades / day</span><b>3</b></div><div class="row"><span class="muted">Minimum signal score</span><b>75</b></div><div class="row"><span class="muted">Naked option selling</span><b class="green">OFF</b></div></div></div>
+<div class="card"><h2 class="section-title">AI signal monitor</h2><div class="signal"><div><span class="muted">Options buying</span><strong>WAIT</strong><small class="muted">No verified live feed</small></div><div><span class="muted">Hedged selling</span><strong>WAIT</strong><small class="muted">Defined-risk only</small></div></div></div>
 </section>
-<section id="gap" class="page hidden">
-<div class="card"><h2>Next Day Gap Prediction AI</h2><p><span class="pill">रोज़ 3:15 PM IST का लक्ष्य समय</span></p>
-<div class="grid"><div class="metric">Gap Up probability<b>—</b></div><div class="metric">Gap Down probability<b>—</b></div><div class="metric">Flat probability<b>—</b></div><div class="metric">Confidence<b>डेटा नहीं</b></div></div>
-<p class="note warn">Forecast अभी उपलब्ध नहीं है: live NIFTY, India VIX, OI, GIFT NIFTY और global market data feed जोड़ा नहीं गया है। बिना डेटा के कोई अनुमान नहीं दिखाया जाएगा।</p>
-<p class="note">योजना: 3:15 PM initial forecast → 3:30 PM close update → overnight cue refresh → अगले market open से पहले final update. परिणाम probabilistic होगा, guaranteed नहीं।</p>
-</div></section>
-<section id="settings" class="page hidden">
-<div class="card"><h2>User Risk Settings</h2><div class="grid">
-<div><label>पूँजी ₹ (0–10,00,000)</label><input id="capital" type="number" value="25000" min="0" max="1000000"></div>
-<div><label>प्रति ट्रेड जोखिम ₹</label><input id="risk" type="number" value="600"></div>
-<div><label>दैनिक नुकसान सीमा ₹</label><input id="loss" type="number" value="2000"></div>
-<div><label>अधिकतम ट्रेड / दिन</label><input id="trades" type="number" value="3"></div>
-<div><label>अधिकतम खुली पोजीशन</label><input id="positions" type="number" value="1"></div>
-<div><label>न्यूनतम सिग्नल स्कोर</label><input id="score" type="number" value="75"></div>
+<section id="gap" class="page"><div class="card"><div class="eyebrow">Next session outlook</div><h2 class="section-title">NIFTY 50 · Gap AI Prediction</h2><div class="muted">Daily forecast schedule target: 3:15 PM IST</div><div class="metrics"><div class="metric"><label>Gap Up</label><strong class="green" id="up">—</strong></div><div class="metric"><label>Gap Down</label><strong class="red" id="down">—</strong></div><div class="metric"><label>Flat</label><strong id="flat">—</strong></div><div class="metric"><label>Confidence</label><strong class="gold">—</strong></div></div><div class="note">Forecast feed अभी connected नहीं है। यहां कोई वास्तविक probability या confidence प्रदर्शित नहीं की जा रही। Live NIFTY, India VIX, global cues और overnight data जुड़ने के बाद ही गणना होगी।</div></div><div class="card"><h2 class="section-title">Forecast inputs</h2><table class="table"><tr><th>Input</th><th>Status</th></tr><tr><td>NIFTY closing data</td><td class="red">Not connected</td></tr><tr><td>India VIX</td><td class="red">Not connected</td></tr><tr><td>Global indices</td><td class="red">Not connected</td></tr><tr><td>Overnight cues</td><td class="red">Not connected</td></tr></table></div></section>
+<section id="settings" class="page"><div class="card"><div class="eyebrow">Personal configuration</div><h2 class="section-title">User Risk Settings</h2><div class="grid2"><div class="field"><label>Trading capital (₹)</label><input id="capital" type="number" min="0" max="1000000" value="25000"></div><div class="field"><label>Per trade risk (₹)</label><input id="risk" type="number" value="600"></div><div class="field"><label>Daily max loss (₹)</label><input id="loss" type="number" value="2000"></div><div class="field"><label>Maximum trades / day</label><input id="trades" type="number" value="3"></div><div class="field"><label>Maximum open positions</label><input id="positions" type="number" value="1"></div><div class="field"><label>Minimum signal score</label><input id="score" type="number" min="0" max="100" value="75"></div></div><button class="btn primary" id="saveBtn">Save settings on this device</button><p id="saveMsg" class="muted"></p></div><div class="card"><h2 class="section-title">Strategy framework</h2><p class="muted">NIFTY 50 · 5-minute candles · EMA 9/20/50/200 · VWAP · RSI · MACD · ATR · ADX · Supertrend · Bollinger Bands</p><p class="muted">Options Buying + Hedged / Defined-risk Options Selling. Naked selling disabled.</p></div></section>
+<section id="admin" class="page"><div class="card"><div class="eyebrow">Administrator workspace</div><h2 class="section-title">Master Panel</h2><div class="note">यह केवल UI placeholder है। Admin authentication, user accounts, subscription billing और server-side controls अभी implement नहीं हैं।</div><div class="metrics"><div class="metric"><label>Users</label><strong>—</strong></div><div class="metric"><label>Subscriptions</label><strong>—</strong></div><div class="metric"><label>Broker links</label><strong>0</strong></div><div class="metric"><label>System status</label><strong class="gold">Preview</strong></div></div></div></section>
+<div class="footer">NIFTY AUTO AI · PREMIUM UI PREVIEW · REAL TRADING LOCKED</div>
 </div>
-<p class="note">NIFTY 50 only · 5-minute candles · EMA 9/20/50/200 · RSI, MACD, VWAP, ATR, ADX, Supertrend, Bollinger Bands, volume indicators</p>
-<p class="note">Options Buying + Hedged/Defined-risk Selling. Naked option selling OFF.</p>
-<button id="save">Settings validate करें</button><p id="settingsMsg" class="note"></p>
-</div></section>
-<section id="admin" class="page hidden"><div class="card"><h2>Admin Master Panel</h2><p class="note">यह placeholder स्क्रीन है। वास्तविक admin login, role permissions, audit logs और user management backend सुरक्षा जाँच के बाद जोड़े जाएँगे।</p><p>Broker integration: <b>Not connected</b></p><p>Live Trading: <b class="bad">DISABLED</b></p><p>Cloud service: <b>Not deployed</b></p></div></section>
-<div class="card"><p class="note">सुरक्षा: API Key, TOTP seed, trading PIN या access token इस prototype में न डालें। Live trading बंद है। इसे production trading app न समझें।</p></div>
-</main>
 <script>
-const pages=[...document.querySelectorAll('.page')],nav=[...document.querySelectorAll('[data-page]')];
-function show(id){pages.forEach(p=>p.classList.toggle('hidden',p.id!==id));nav.forEach(b=>b.classList.toggle('active',b.dataset.page===id))}
-nav.forEach(b=>b.addEventListener('click',()=>show(b.dataset.page)));
-let running=false;
-paperOn.onclick=()=>{running=true;mode.textContent='PAPER';paperStatus.textContent='Paper preview चालू (सिर्फ UI state, कोई market order नहीं)।'};
-paperOff.onclick=()=>{running=false;paperStatus.textContent='Paper preview बंद।'};
-emergency.onclick=()=>{running=false;paperStatus.textContent='Paper preview बंद।';stopStatus.textContent='Emergency stop demo: नए paper actions रोके गए। कोई broker position close नहीं हुई।'};
-save.onclick=()=>{let c=+capital.value,r=+risk.value,l=+loss.value,t=+trades.value,p=+positions.value,s=+score.value;
-let m=(c<0||c>1000000)?'पूँजी ₹0 से ₹10,00,000 के बीच होनी चाहिए.':(c===0?'पूँजी ₹0: नई entry निष्क्रिय रहेगी.':(r<=0||l<=0||r>c||l>c?'Risk और daily loss पूँजी से अधिक नहीं हो सकते.':(t<1||t>50||p!==1||s<0||s>100?'Trade/position/score सीमा जाँचें.':'Settings validation सफल। अभी server पर save नहीं हुई हैं.')));
-settingsMsg.textContent=m;};
-</script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script></body></html>
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===b.dataset.tab));}));
+let auto=false, paper=true;
+const autoBtn=document.getElementById('autoBtn'),autoState=document.getElementById('autoState'),msg=document.getElementById('controlMsg');
+autoBtn.onclick=()=>{auto=!auto;autoBtn.textContent='Auto Trading '+(auto?'ON':'OFF');autoState.textContent=auto?'ON':'OFF';autoState.className=auto?'green':'red';msg.textContent=auto?'Demo toggle ON है; कोई वास्तविक order नहीं भेजा जाएगा।':'Auto Trading OFF है।';};
+document.getElementById('paperBtn').onclick=()=>{paper=!paper;document.getElementById('paperBtn').textContent=paper?'Paper Mode ON':'Paper Mode OFF';msg.textContent=paper?'Paper preview चालू है।':'Paper preview बंद है।';};
+document.getElementById('stopBtn').onclick=()=>{auto=false;autoBtn.textContent='Auto Trading OFF';autoState.textContent='OFF';autoState.className='red';msg.textContent='Emergency Stop demo: auto toggle OFF किया गया।';};
+document.getElementById('saveBtn').onclick=()=>{let c=+capital.value,r=+risk.value,l=+loss.value,t=+trades.value,p=+positions.value,s=+score.value;let out=document.getElementById('saveMsg');if(c<0||c>1000000||r<0||l<0||t<0||p<0||s<0||s>100){out.textContent='कृपया वैध limits दर्ज करें।';out.className='red';return;}try{localStorage.setItem('naa_settings',JSON.stringify({c,r,l,t,p,s}));out.textContent='Settings इस browser में save हो गईं।';out.className='green';}catch(e){out.textContent='इस browser में save नहीं हो सका।';}};
+try{let v=JSON.parse(localStorage.getItem('naa_settings')||'null');if(v){capital.value=v.c;risk.value=v.r;loss.value=v.l;trades.value=v.t;positions.value=v.p;score.value=v.s;}}catch(e){}
+</script>
+</body></html>
