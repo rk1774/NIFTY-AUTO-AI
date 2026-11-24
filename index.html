@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101827"><title>NIFTY AUTO AI V6</title>
+<meta name="theme-color" content="#101827"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png"><title>NIFTY AUTO AI V6</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1220;--panel:#141f31;--line:#26364d;--muted:#9aabc2;--green:#28c58a;--blue:#6ba8ff;--red:#ff7272}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f4f7fb;font:15px system-ui,sans-serif}header{padding:17px;background:#101827;border-bottom:1px solid var(--line)}h1{font-size:21px;margin:0}header small,.muted,.note{color:var(--muted)}main{max-width:850px;margin:auto;padding:14px}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}.tabs button{flex:1;min-width:100px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:12px}h2{font-size:17px;margin:0 0 12px}button{border:0;border-radius:9px;padding:11px 13px;background:var(--green);color:#062219;font-weight:700}button.alt{background:#26364d;color:#eef4fc}input,select{width:100%;background:#0c1626;border:1px solid var(--line);color:white;padding:11px;border-radius:8px;margin:5px 0 12px}label{font-size:13px;color:#bdc9d9}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:#0e1929;padding:12px;border-radius:10px}.metric b{display:block;font-size:20px;margin-top:4px}.hidden{display:none}.note{font-size:12px;line-height:1.55}.good{color:var(--green)}.warn{color:#ffd27a}.bad{color:var(--red)}.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#26364d;font-size:12px}
@@ -59,4 +59,4 @@ emergency.onclick=()=>{running=false;paperStatus.textContent='Paper preview ब�
 save.onclick=()=>{let c=+capital.value,r=+risk.value,l=+loss.value,t=+trades.value,p=+positions.value,s=+score.value;
 let m=(c<0||c>1000000)?'पूँजी ₹0 से ₹10,00,000 के बीच होनी चाहिए.':(c===0?'पूँजी ₹0: नई entry निष्क्रिय रहेगी.':(r<=0||l<=0||r>c||l>c?'Risk और daily loss पूँजी से अधिक नहीं हो सकते.':(t<1||t>50||p!==1||s<0||s>100?'Trade/position/score सीमा जाँचें.':'Settings validation सफल। अभी server पर save नहीं हुई हैं.')));
 settingsMsg.textContent=m;};
-</script></body></html>
+</script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script></body></html>
