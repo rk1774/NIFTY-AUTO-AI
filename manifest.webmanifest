@@ -1,16 +1,16 @@
 {
   "name": "NIFTY AUTO AI",
   "short_name": "NIFTY AI",
-  "description": "NIFTY 50 dashboard prototype",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0b1220",
-  "theme_color": "#101827",
   "orientation": "portrait",
+  "background_color": "#071426",
+  "theme_color": "#071426",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "gold-bull-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
