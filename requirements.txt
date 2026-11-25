@@ -1,3 +1,12 @@
 fastapi==0.115.12
 uvicorn[standard]==0.34.0
 pydantic==2.10.6
+smartapi-python
+pyotp
+requests
+websocket-client
+logzero
+pycryptodome
+pandas
+numpy
+python-dotenv
