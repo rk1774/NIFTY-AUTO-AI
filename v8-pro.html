@@ -10,6 +10,105 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="options-ai.js"></script>
   <script src="options-ui.js"></script>
+  <style>
+html,body{
+width:100%;
+max-width:100%;
+margin:0;
+}
+main{
+width:100%;
+min-width:0;
+}
+#dashboard,#detail,#content{
+width:100%;
+min-width:0;
+max-width:100%;
+}
+#options-ai-panel{
+background:#14243a!important;
+color:#eef3fa!important;
+border:1px solid #34445b!important;
+width:100%!important;
+max-width:100%!important;
+margin:16px 0!important;
+padding:16px!important;
+box-sizing:border-box!important;
+}
+#options-ai-panel p,
+#options-ai-panel span{
+color:#eef3fa!important;
+}
+#options-ai-panel h2,
+#options-ai-panel b{
+color:#e7bd69!important;
+}
+#options-ai-panel hr{
+border:0;
+border-top:1px solid #34445b;
+}
+@media(max-width:699px){
+main{
+padding:12px!important;
+}
+.grid{
+grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+.tile{
+min-width:0!important;
+width:100%!important;
+}
+section{
+max-width:100%;
+overflow-wrap:anywhere;
+}
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+
+const panel =
+document.getElementById("options-ai-panel");
+
+const content =
+document.getElementById("content");
+
+const heading =
+document.getElementById("heading");
+
+if(!panel || !content || !heading)return;
+
+panel.remove();
+
+function syncOptionsPanel(){
+
+if(heading.textContent.trim()==="Options AI"){
+if(!content.contains(panel)){
+content.appendChild(panel);
+}
+}else{
+panel.remove();
+}
+
+}
+
+const observer = new MutationObserver(syncOptionsPanel);
+
+observer.observe(heading,{
+childList:true,
+subtree:true,
+characterData:true
+});
+
+observer.observe(content,{
+childList:true
+});
+
+syncOptionsPanel();
+
+});
+</script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#08111f;color:#eef3fa;font:16px system-ui,sans-serif}
