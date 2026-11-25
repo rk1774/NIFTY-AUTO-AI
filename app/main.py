@@ -673,3 +673,78 @@ def score_gap(inputs: GapInputs):
 def gap_score(inputs: GapInputs):
 
     return score_gap(inputs)
+
+# =================================
+# SECURE STOCK SCANNER API
+# =================================
+
+from .angel_market import get_bulk_quotes
+
+import time
+
+scanner_lock = __import__("threading").Lock()
+scanner_last_request = 0.0
+
+
+class ScannerRequest(BaseModel):
+
+    tokens: list[str] = Field(
+        min_length=1,
+        max_length=50
+    )
+
+
+@app.post(
+    "/app/market/scanner",
+    dependencies=[Depends(verify_app_user)]
+)
+def app_market_scanner(
+    request: ScannerRequest
+):
+
+    global scanner_last_request
+
+    with scanner_lock:
+
+        now = time.monotonic()
+
+        if now - scanner_last_request < 2:
+
+            raise HTTPException(
+                status_code=429,
+                detail="Please wait before refreshing"
+            )
+
+        scanner_last_request = now
+
+        try:
+
+            result = get_bulk_quotes(
+                request.tokens
+            )
+
+            return {
+                "status": "success",
+                "mode": "READ_ONLY",
+                "source": "Angel One",
+                "count": len(result["quotes"]),
+                "quotes": result["quotes"],
+                "unfetched": result["unfetched"],
+                "received_at": result["received_at"],
+                "live_trading": False,
+                "naked_selling": False
+            }
+
+        except ValueError:
+
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid stock tokens"
+            )
+
+        except Exception:
+
+            raise HTTPException(
+                status_code=503,
+                detail="Stock scanner data unavailable"
+            )
