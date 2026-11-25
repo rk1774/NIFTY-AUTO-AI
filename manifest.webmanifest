@@ -2,12 +2,12 @@
   "name": "NIFTY AUTO AI",
   "short_name": "NIFTY AI",
   "id": "./",
-  "start_url": "./",
+  "start_url": "./v8-pro.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#071426",
-  "theme_color": "#071426",
+  "background_color": "#08111f",
+  "theme_color": "#08111f",
   "icons": [
     {
       "src": "gold-bull-192.png",
