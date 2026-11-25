@@ -87,6 +87,7 @@ class GapInputs(BaseModel):
 
 @app.get("/")
 def home():
+
     return {
         "app": "NIFTY AUTO AI",
         "version": "V8 PRO",
@@ -117,6 +118,7 @@ def health():
     dependencies=[Depends(verify_access)]
 )
 def market_status():
+
     return angel_market.status()
 
 
@@ -131,6 +133,7 @@ def market_status():
 def market_connect():
 
     try:
+
         angel_market.connect()
 
         return {
@@ -141,6 +144,7 @@ def market_connect():
         }
 
     except Exception:
+
         raise HTTPException(
             status_code=503,
             detail="Angel One connection failed"
@@ -158,7 +162,8 @@ def market_connect():
 def market_ltp(
     exchange: Literal["NSE", "NFO"] = "NSE",
     symbol: str = Query(
-        min_length=1, max_length=60
+        min_length=1,
+        max_length=60
     ),
     token: str = Query(
         pattern=r"^[0-9]{1,15}$"
@@ -166,6 +171,7 @@ def market_ltp(
 ):
 
     try:
+
         return angel_market.get_ltp(
             exchange,
             symbol,
@@ -173,6 +179,7 @@ def market_ltp(
         )
 
     except Exception:
+
         raise HTTPException(
             status_code=503,
             detail="Market price unavailable"
@@ -181,6 +188,7 @@ def market_ltp(
 
 # ---------------------------------
 # HISTORICAL CANDLE DATA
+# UPGRADED TO 10 DAYS
 # ---------------------------------
 
 @app.get(
@@ -193,7 +201,11 @@ def market_candles(
         pattern=r"^[0-9]{1,15}$"
     ),
     interval: str = "FIVE_MINUTE",
-    days: int = Query(default=5, ge=1, le=5)
+    days: int = Query(
+        default=10,
+        ge=1,
+        le=10
+    )
 ):
 
     try:
@@ -205,23 +217,32 @@ def market_candles(
             days
         )
 
+        candle_count = len(candles)
+
         return {
             "exchange": exchange,
             "token": token,
             "interval": interval,
-            "count": len(candles),
+            "days": days,
+            "count": candle_count,
+            "minimum_required": 200,
+            "minimum_candle_count_met": (
+                candle_count >= 200
+            ),
             "candles": candles,
             "source": "Angel One",
             "live_trading": False
         }
 
     except ValueError:
+
         raise HTTPException(
             status_code=400,
             detail="Invalid candle parameters"
         )
 
     except Exception:
+
         raise HTTPException(
             status_code=503,
             detail="Candle data unavailable"
@@ -239,6 +260,7 @@ def market_candles(
 def market_disconnect():
 
     try:
+
         angel_market.disconnect()
 
         return {
@@ -247,6 +269,7 @@ def market_disconnect():
         }
 
     except Exception:
+
         raise HTTPException(
             status_code=503,
             detail="Broker logout not confirmed"
@@ -285,24 +308,28 @@ def validate_risk(settings: RiskSettings):
         or settings.risk_per_trade == 0
         or settings.daily_loss_limit == 0
     ):
+
         return {
             "valid": True,
             "new_entries_enabled": False
         }
 
     if settings.risk_per_trade > settings.capital:
+
         return {
             "valid": False,
             "reason": "Trade risk exceeds capital"
         }
 
     if settings.daily_loss_limit > settings.capital:
+
         return {
             "valid": False,
             "reason": "Daily loss exceeds capital"
         }
 
     if settings.risk_per_trade > settings.daily_loss_limit:
+
         return {
             "valid": False,
             "reason": "Trade risk exceeds daily loss limit"
@@ -385,5 +412,5 @@ def score_gap(inputs: GapInputs):
 
 @app.post("/gap/score")
 def gap_score(inputs: GapInputs):
-    return score_gap(inputs)
 
+    return score_gap(inputs)
