@@ -1148,3 +1148,250 @@
 
 })();
 
+/* NIFTY AUTO AI V8.1 STOCK SCANNER */
+
+(function () {
+  "use strict";
+
+  const API =
+    "https://nifty-auto-ai.onrender.com";
+
+  const STOCKS = [
+    "2885",
+    "11536",
+    "1594",
+    "1333",
+    "4963"
+  ];
+
+  const PAGES = [
+    "Stock Scanner",
+    "Live Ranking",
+    "Bullish Stocks",
+    "Bearish Stocks"
+  ];
+
+  let busy = false;
+
+  function visible() {
+    const heading =
+      document.getElementById("heading");
+
+    const detail =
+      document.getElementById("detail");
+
+    return (
+      heading &&
+      detail &&
+      !detail.hidden &&
+      !document.hidden &&
+      PAGES.includes(
+        heading.textContent.trim()
+      )
+    );
+  }
+
+  function message(text) {
+    const root =
+      document.getElementById("market-ui-panel");
+
+    if (!root) return;
+
+    let node =
+      document.getElementById("scanner-status");
+
+    if (!node) {
+      node = document.createElement("p");
+      node.id = "scanner-status";
+      node.style.color = "#e7bd69";
+      root.prepend(node);
+    }
+
+    node.textContent = text;
+  }
+
+  async function refreshScanner() {
+    if (busy || !visible()) return;
+
+    busy = true;
+
+    let timer;
+
+    try {
+      if (
+        typeof db === "undefined" ||
+        typeof currentUser === "undefined" ||
+        !currentUser
+      ) {
+        throw new Error("Login required");
+      }
+
+      const uid = currentUser.id;
+
+      const { data, error } =
+        await db.auth.getSession();
+
+      if (
+        error ||
+        !data.session ||
+        data.session.user.id !== uid
+      ) {
+        throw new Error("Invalid session");
+      }
+
+      message("Connecting Stock Scanner...");
+
+      const controller =
+        new AbortController();
+
+      timer = setTimeout(
+        () => controller.abort(),
+        90000
+      );
+
+      const response = await fetch(
+        API + "/app/market/scanner",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization":
+              "Bearer " +
+              data.session.access_token
+          },
+          body: JSON.stringify({
+            tokens: STOCKS
+          }),
+          cache: "no-store",
+          signal: controller.signal
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Scanner API error " +
+          response.status
+        );
+      }
+
+      const result = await response.json();
+
+      if (
+        !visible() ||
+        currentUser?.id !== uid
+      ) return;
+
+      if (
+        !Array.isArray(result.quotes)
+      ) {
+        throw new Error("Invalid quote data");
+      }
+
+      const quotes = result.quotes
+        .map(q => {
+          const price = Number(q.ltp);
+          const close = Number(q.close);
+
+          const change =
+            close > 0
+              ? (price - close) / close * 100
+              : null;
+
+          return {
+            symbol: String(
+              q.tradingSymbol ||
+              q.symbolToken ||
+              ""
+            ),
+            price,
+            change,
+            score: null,
+            trend: "UNVERIFIED"
+          };
+        })
+        .filter(q =>
+          q.symbol &&
+          Number.isFinite(q.price) &&
+          q.price > 0
+        );
+
+      quotes.sort(
+        (a, b) =>
+          (b.change ?? -Infinity) -
+          (a.change ?? -Infinity)
+      );
+
+      window.NiftyMarketUI?.update({
+        quotes,
+        updated: result.received_at
+          ? new Date(
+              result.received_at
+            ).toLocaleString(
+              "en-IN",
+              {
+                timeZone: "Asia/Kolkata"
+              }
+            )
+          : null
+      });
+
+      message(
+        "SCANNER TEST | " +
+        quotes.length +
+        "/5 quotes received | " +
+        "Freshness not verified | " +
+        "AI signals disabled"
+      );
+
+    } catch (error) {
+
+      window.NiftyMarketUI?.update({
+        quotes: []
+      });
+
+      message(
+        "Scanner: " +
+        (error.message || "Unavailable")
+      );
+
+    } finally {
+      clearTimeout(timer);
+      busy = false;
+    }
+  }
+
+  function init() {
+    const heading =
+      document.getElementById("heading");
+
+    if (!heading) return;
+
+    new MutationObserver(() => {
+      setTimeout(refreshScanner, 1000);
+    }).observe(heading, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+
+    document.addEventListener(
+      "visibilitychange",
+      refreshScanner
+    );
+
+    setInterval(refreshScanner, 60000);
+
+    refreshScanner();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      init
+    );
+  } else {
+    init();
+  }
+
+})();
+
