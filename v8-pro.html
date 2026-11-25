@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="hi">
 <head>
@@ -8,6 +9,7 @@
 <link rel="icon" href="gold-bull-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#08111f;color:#eef3fa;font:16px system-ui,sans-serif}
@@ -30,13 +32,21 @@ label{display:block}
 .wide{width:100%;margin-top:10px}
 footer{text-align:center;color:#aebed1;font-size:12px;padding:20px}
 [hidden]{display:none!important}
+.plans{display:grid;gap:9px;margin:15px 0}
+.plan{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;background:#0c1828;border:1px solid #34445b;border-radius:10px}
+.plan strong{color:#e7bd69}
+.plan.free{border-color:#4ade80}
+.plan.free strong{color:#4ade80}
+#subStatus{white-space:pre-line;padding:12px;background:#0c1828;border-radius:10px;overflow-wrap:anywhere}
 @media(min-width:700px){.tile{min-height:140px}.grid{gap:16px}}
 </style>
 </head>
+
 <body>
 <main>
+
 <header>
-<img src="gold-bull-192.png" alt="" onerror="this.hidden=true">
+<img src="gold-bull-192.png" alt="NIFTY AUTO AI" onerror="this.hidden=true">
 <div>
 <h1>NIFTY AUTO AI</h1>
 <small>V8 PRO · ADVANCED TRADING PLATFORM</small>
@@ -44,12 +54,16 @@ footer{text-align:center;color:#aebed1;font-size:12px;padding:20px}
 </header>
 
 <section id="gate">
+
 <h2>Welcome / स्वागत है</h2>
+
 <div id="authForm">
-<label>Email</label>
+<label for="email">Email</label>
 <input id="email" type="email" autocomplete="email" placeholder="Enter email address">
-<label>Password</label>
+
+<label for="password">Password</label>
 <input id="password" type="password" autocomplete="current-password" placeholder="Enter password">
+
 <button class="wide" id="login">Login</button>
 <button class="wide" id="register">New Registration</button>
 <button class="wide" id="forgot">Forgot Password</button>
@@ -69,35 +83,87 @@ footer{text-align:center;color:#aebed1;font-size:12px;padding:20px}
 
 <p id="message" class="note" role="status" aria-live="polite"></p>
 
-<h2>Subscription</h2>
-<p>Monthly / Annual plans — कीमत तय होना बाकी है।</p>
-<button class="wide" disabled>Subscribe / AutoPay</button>
-<p class="note">Subscription: NOT VERIFIED</p>
+<h2>Subscription Plans</h2>
+
+<div class="plans">
+
+<div class="plan free">
+<span>7 Days Free Trial</span>
+<strong>₹0</strong>
+</div>
+
+<div class="plan">
+<span>Monthly</span>
+<strong>₹499</strong>
+</div>
+
+<div class="plan">
+<span>Quarterly</span>
+<strong>₹1,299</strong>
+</div>
+
+<div class="plan">
+<span>Half Yearly</span>
+<strong>₹2,499</strong>
+</div>
+
+<div class="plan">
+<span>Yearly</span>
+<strong>₹4,499</strong>
+</div>
+
+</div>
+
+<p id="subStatus" class="note" role="status" aria-live="polite">
+Subscription: Checking...
+</p>
+
+<button class="wide" id="subscribe" disabled>
+Subscribe / AutoPay
+</button>
+
 <p>Payment integration pending. Real trading locked.</p>
-<button class="wide" id="preview">केवल डिजाइन देखें (Demo)</button>
+
+<button class="wide" id="preview">
+केवल डिजाइन देखें (Demo)
+</button>
+
 </section>
 
 <div id="dashboard" hidden>
+
 <section style="padding:12px">
 <strong>DESIGN PREVIEW ONLY</strong>
-<p>Subscription verified नहीं है। वास्तविक सेवाएँ लॉक हैं।</p>
+<p id="dashboardStatus">वास्तविक ट्रेडिंग सेवाएँ अभी उपलब्ध नहीं हैं।</p>
 <button id="exit">Back to Account</button>
 </section>
+
 <div class="grid" id="tiles"></div>
+
 <footer>PAPER PREVIEW · REAL TRADING LOCKED</footer>
+
 </div>
 
 <section id="detail" hidden>
+
 <button id="back">← Dashboard</button>
 <h2 id="heading"></h2>
 <div id="content"></div>
-<p class="note">Demo only · कोई वास्तविक ऑर्डर या भुगतान नहीं।</p>
+
+<p class="note">
+Demo only · कोई वास्तविक ऑर्डर या भुगतान नहीं।
+</p>
+
 </section>
 
-<footer>Never enter broker secrets on this public page.</footer>
+<footer>
+Never enter broker secrets on this public page.
+</footer>
+
 </main>
 
 <script>
+
 const SUPABASE_URL =
 'https://lfgsdwyhdmgbzqyajygn.supabase.co';
 
@@ -107,302 +173,504 @@ const SUPABASE_KEY =
 const REDIRECT_URL =
 'https://rk1774.github.io/NIFTY-AUTO-AI/v8-pro.html';
 
-const $=id=>document.getElementById(id);
-let db=null;
-let currentUser=null;
-let recovering=false;
-let busy=false;
+const $ = id => document.getElementById(id);
+
+let db = null;
+let currentUser = null;
+let recovering = false;
+let busy = false;
+let subRequest = 0;
+let subscriptionData = null;
 
 function notify(message){
-$('message').textContent=message;
+$('message').textContent = message;
 }
 
 function show(id){
 for(const x of ['gate','dashboard','detail']){
-$(x).hidden=x!==id;
+$(x).hidden = x !== id;
 }
 window.scrollTo(0,0);
 }
 
+function setSubscriptionStatus(message,color='#e7bd69'){
+$('subStatus').textContent = message;
+$('subStatus').style.color = color;
+}
+
 function updateAccount(session){
-currentUser=session?.user||null;
-$('authForm').hidden=!!currentUser||recovering;
-$('account').hidden=!currentUser||recovering;
-$('recovery').hidden=!recovering;
-$('userEmail').textContent=currentUser?.email||'';
+
+currentUser = session?.user || null;
+
+$('authForm').hidden = !!currentUser || recovering;
+$('account').hidden = !currentUser || recovering;
+$('recovery').hidden = !recovering;
+
+$('userEmail').textContent =
+currentUser?.email || '';
+
 }
 
 function setBusy(value){
-busy=value;
-for(const id of ['login','register','forgot','logout','reset']){
-$(id).disabled=value||!db;
+
+busy = value;
+
+for(const id of [
+'login',
+'register',
+'forgot',
+'logout',
+'reset'
+]){
+$(id).disabled = value || !db;
 }
+
 }
 
 async function action(fn){
-if(!db||busy)return;
+
+if(!db || busy)return;
+
 setBusy(true);
+
 try{
 await fn();
 }catch(error){
-notify(error.message||'Connection failed. Try again.');
+notify(error.message || 'Connection failed. Try again.');
 }finally{
 setBusy(false);
 }
+
+}
+
+async function checkSubscription(){
+
+const request = ++subRequest;
+const uid = currentUser?.id;
+
+subscriptionData = null;
+
+$('dashboardStatus').textContent =
+'वास्तविक ट्रेडिंग सेवाएँ अभी उपलब्ध नहीं हैं।';
+
+if(!db){
+setSubscriptionStatus('Subscription: Connection unavailable');
+return;
+}
+
+if(!uid || recovering){
+setSubscriptionStatus('Subscription: Login required');
+return;
+}
+
+setSubscriptionStatus('Checking subscription...');
+
+try{
+
+const {data,error} = await db
+.from('subscriptions')
+.select('plan,status,valid_until')
+.eq('user_id',uid)
+.maybeSingle();
+
+if(request !== subRequest ||
+currentUser?.id !== uid ||
+recovering)return;
+
+if(error)throw error;
+
+if(!data){
+setSubscriptionStatus('Subscription: Not available');
+return;
+}
+
+const expiry = new Date(data.valid_until);
+const remaining = expiry.getTime() - Date.now();
+
+if(data.status === 'active' && remaining > 0){
+
+subscriptionData = data;
+
+const days = Math.ceil(remaining / 86400000);
+
+const plan = String(data.plan || 'unknown').toUpperCase();
+
+const validUntil = expiry.toLocaleString('en-IN',{
+timeZone:'Asia/Kolkata'
+});
+
+setSubscriptionStatus(
+'Subscription: ACTIVE\n' +
+'Plan: ' + plan + '\n' +
+'Remaining: ' + days + ' days\n' +
+'Valid until: ' + validUntil,
+'#4ade80'
+);
+
+$('dashboardStatus').textContent =
+'Subscription ACTIVE · ' + plan +
+' · ' + days +
+' days remaining. Trading services pending.';
+
+}else{
+
+setSubscriptionStatus(
+'Subscription: Inactive / Expired',
+'#f87171'
+);
+
+}
+
+}catch(error){
+
+if(request !== subRequest)return;
+
+setSubscriptionStatus(
+'Subscription verification failed',
+'#f87171'
+);
+
+}
+
 }
 
 try{
-db=window.supabase.createClient(
-SUPABASE_URL,SUPABASE_KEY
+
+db = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
 );
 
 db.auth.onAuthStateChange((event,session)=>{
-if(event==='PASSWORD_RECOVERY'){
-recovering=true;
+
+if(event === 'PASSWORD_RECOVERY'){
+recovering = true;
 show('gate');
 notify('अपना नया पासवर्ड बनाएं।');
 }
-if(event==='SIGNED_OUT'){
-recovering=false;
+
+if(event === 'SIGNED_OUT'){
+recovering = false;
+subscriptionData = null;
+show('gate');
 }
+
 updateAccount(session);
+
+setTimeout(checkSubscription,0);
+
 });
 
 db.auth.getSession().then(({data,error})=>{
-if(error)notify(error.message);
-else updateAccount(data.session);
-});
-}catch(error){
-notify('Supabase connection failed.');
-setBusy(false);
+
+if(error){
+notify(error.message);
+}else{
+updateAccount(data.session);
+checkSubscription();
 }
 
-$('register').onclick=()=>action(async()=>{
-const email=$('email').value.trim();
-const password=$('password').value;
+});
 
-if(!email||password.length<8){
+setInterval(checkSubscription,60000);
+
+document.addEventListener('visibilitychange',()=>{
+if(!document.hidden){
+checkSubscription();
+}
+});
+
+}catch(error){
+
+notify('Supabase connection failed.');
+setSubscriptionStatus('Connection unavailable');
+setBusy(false);
+
+}
+
+$('register').onclick = ()=>action(async()=>{
+
+const email = $('email').value.trim();
+const password = $('password').value;
+
+if(!email || password.length < 8){
 notify('Email और कम से कम 8 अक्षरों का Password डालें।');
 return;
 }
 
-const {data,error}=await db.auth.signUp({
-email,password,
-options:{emailRedirectTo:REDIRECT_URL}
+const {data,error} = await db.auth.signUp({
+
+email,
+password,
+
+options:{
+emailRedirectTo:REDIRECT_URL
+}
+
 });
 
 if(error)throw error;
-$('password').value='';
+
+$('password').value = '';
+
 notify(data.session
 ?'Registration successful.'
 :'Email verification link के लिए अपना inbox देखें।');
+
 });
 
-$('login').onclick=()=>action(async()=>{
-const email=$('email').value.trim();
-const password=$('password').value;
+$('login').onclick = ()=>action(async()=>{
 
-if(!email||!password){
+const email = $('email').value.trim();
+const password = $('password').value;
+
+if(!email || !password){
 notify('Email और Password डालें।');
 return;
 }
 
-const {error}=await db.auth.signInWithPassword({
-email,password
+const {data,error} =
+await db.auth.signInWithPassword({
+email,
+password
 });
 
 if(error)throw error;
-$('password').value='';
-notify('Login successful. Subscription verification pending.');
+
+$('password').value = '';
+
+updateAccount(data.session);
+
+notify('Login successful.');
+
+await checkSubscription();
+
 });
 
-$('forgot').onclick=()=>action(async()=>{
-const email=$('email').value.trim();
+$('forgot').onclick = ()=>action(async()=>{
+
+const email = $('email').value.trim();
+
 if(!email){
 notify('पहले अपना Email डालें।');
 return;
 }
-const {error}=await db.auth.resetPasswordForEmail(
-email,{redirectTo:REDIRECT_URL}
+
+const {error} =
+await db.auth.resetPasswordForEmail(
+email,
+{redirectTo:REDIRECT_URL}
 );
+
 if(error)throw error;
+
 notify('यदि खाता मौजूद है तो reset email भेजा जाएगा।');
+
 });
 
-$('reset').onclick=()=>action(async()=>{
+$('reset').onclick = ()=>action(async()=>{
+
 if(!recovering)return;
-const password=$('newPassword').value;
-if(password.length<8){
+
+const password = $('newPassword').value;
+
+if(password.length < 8){
 notify('कम से कम 8 अक्षरों का Password रखें।');
 return;
 }
-const {data,error}=await db.auth.updateUser({password});
+
+const {data,error} =
+await db.auth.updateUser({password});
+
 if(error)throw error;
-recovering=false;
-$('newPassword').value='';
+
+recovering = false;
+
+$('newPassword').value = '';
+
 updateAccount({user:data.user});
+
 notify('Password successfully updated.');
+
+await checkSubscription();
+
 });
 
-$('logout').onclick=()=>action(async()=>{
-const {error}=await db.auth.signOut();
+$('logout').onclick = ()=>action(async()=>{
+
+const {error} = await db.auth.signOut();
+
 if(error)throw error;
-recovering=false;
+
+recovering = false;
+subscriptionData = null;
+
 updateAccount(null);
+
 notify('Logout successful.');
+
+await checkSubscription();
+
 show('gate');
+
 });
 
-$('preview').onclick=()=>show('dashboard');
-$('exit').onclick=()=>show('gate');
-$('back').onclick=()=>show('dashboard');
+$('preview').onclick = ()=>show('dashboard');
+$('exit').onclick = ()=>show('gate');
+$('back').onclick = ()=>show('dashboard');
 
-const items=[
-['Options AI','NIFTY 50 · 5 minute · Options buying / defined-risk hedged selling. No live feed.','M4 3v18h17 M8 5v12m-2-9h4v6H6z M15 3v16m-2-12h4v7h-4z'],
-['Stock Scanner','NSE intraday scanner · authorized market feed pending.','M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5 M10 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8m3 7 4 4'],
-['Live Ranking','Rank | Share | Price | Change | AI Score. No verified data.','M9 5h12M9 12h12M9 19h12M3 3h2v5M3 11h3l-3 4h3M3 18h3v4H3'],
-['Bullish Stocks','Potential upward momentum · no live signals.','M3 18l7-7 4 4 7-10m-6 0h6v6'],
-['Bearish Stocks','Potential downward momentum · no live signals.','M3 5l7 7 4-4 7 10m-6 0h6v-6'],
-['Gap AI','3:15 PM IST next-session probability forecast · pending data.','M12 3v18M12 5C4-1 1 10 5 12c-4 7 4 12 7 7m0-14c8-6 11 5 7 7 4 7-4 12-7 7'],
-['Multi Broker','Angel One, Zerodha, Upstox, Dhan, FYERS — integrations pending.','M3 8l9-5 9 5H3m2 2v9m7-9v9m7-9v9M3 21h18'],
-['Own Code','Custom strategy execution requires isolated runtime and server risk checks.','M8 6l-6 6 6 6m8-12 6 6-6 6m-3-15-2 18'],
-['Google Sheets','Authenticated webhook integration pending.','M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18'],
-['Hybrid AI','Combine approved custom signals and AI filters.','M3 3h7v7H3zM14 14h7v7h-7zM7 10v7h7'],
-['Backtesting','Historical data, costs, slippage and strategy testing pending.','M3 21V3m0 18h18M7 17v-4m5 4V9m5 8V5M6 9l5-5 4 2 6-4'],
-['Live Alerts','Push notifications pending.','M5 17h14l-2-4V8a5 5 0 0 0-10 0v5zM10 21h4'],
-['Risk Control','Risk settings preview.','M12 2l9 4v6c0 5-9 10-9 10S3 17 3 12V6zM8 12l3 3 5-6'],
-['Subscription','Subscription not verified. Payment provider pending.','M3 5h18v14H3zM3 9h18M6 15h5'],
-['Master Panel','Separate administrator authentication and permissions pending.','M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M2 21v-3a7 7 0 0 1 14 0v3m1-18a4 4 0 0 1 0 8m1 3a5 5 0 0 1 4 5v2'],
-['Cloud Server','24×7 trading deployment not connected.','M6 18a5 5 0 0 1-1-10 7 7 0 0 1 13-1 6 6 0 0 1 0 11z'],
-['My Account','Email account management.','M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10M3 22v-3a9 9 0 0 1 18 0v3'],
-['Settings','Trading configuration preview.','M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M10 2h4l1 3 3 1 3 3-2 3 2 3-3 3-3 1-1 3h-4l-1-3-3-1-3-3 2-3-2-3 3-3 3-1z']
+const items = [
+
+['Options AI',
+'NIFTY 50 · 5 minute · Options buying / defined-risk hedged selling. No live feed.',
+'M4 3v18h17 M8 5v12m-2-9h4v6H6z M15 3v16m-2-12h4v7h-4z'],
+
+['Stock Scanner',
+'NSE intraday scanner · authorized market feed pending.',
+'M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5 M10 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8m3 7 4 4'],
+
+['Live Ranking',
+'Rank | Share | Price | Change | AI Score. No verified data.',
+'M9 5h12M9 12h12M9 19h12M3 3h2v5M3 11h3l-3 4h3M3 18h3v4H3'],
+
+['Bullish Stocks',
+'Potential upward momentum · no live signals.',
+'M3 18l7-7 4 4 7-10m-6 0h6v6'],
+
+['Bearish Stocks',
+'Potential downward momentum · no live signals.',
+'M3 5l7 7 4-4 7 10m-6 0h6v-6'],
+
+['Gap AI',
+'3:15 PM IST next-session probability forecast · pending data.',
+'M12 3v18M12 5C4-1 1 10 5 12c-4 7 4 12 7 7m0-14c8-6 11 5 7 7 4 7-4 12-7 7'],
+
+['Multi Broker',
+'Angel One, Zerodha, Upstox, Dhan, FYERS — integrations pending.',
+'M3 8l9-5 9 5H3m2 2v9m7-9v9m7-9v9M3 21h18'],
+
+['Own Code',
+'Custom strategy execution requires isolated runtime and server risk checks.',
+'M8 6l-6 6 6 6m8-12 6 6-6 6m-3-15-2 18'],
+
+['Google Sheets',
+'Authenticated webhook integration pending.',
+'M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18'],
+
+['Hybrid AI',
+'Combine approved custom signals and AI filters.',
+'M3 3h7v7H3zM14 14h7v7h-7zM7 10v7h7'],
+
+['Backtesting',
+'Historical data, costs, slippage and strategy testing pending.',
+'M3 21V3m0 18h18M7 17v-4m5 4V9m5 8V5M6 9l5-5 4 2 6-4'],
+
+['Live Alerts',
+'Push notifications pending.',
+'M5 17h14l-2-4V8a5 5 0 0 0-10 0v5zM10 21h4'],
+
+['Risk Control',
+'Risk settings preview.',
+'M12 2l9 4v6c0 5-9 10-9 10S3 17 3 12V6zM8 12l3 3 5-6'],
+
+['Subscription',
+'Subscription management.',
+'M3 5h18v14H3zM3 9h18M6 15h5'],
+
+['Master Panel',
+'Separate administrator authentication and permissions pending.',
+'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M2 21v-3a7 7 0 0 1 14 0v3m1-18a4 4 0 0 1 0 8m1 3a5 5 0 0 1 4 5v2'],
+
+['Cloud Server',
+'24×7 trading deployment not connected.',
+'M6 18a5 5 0 0 1-1-10 7 7 0 0 1 13-1 6 6 0 0 1 0 11z'],
+
+['My Account',
+'Email account management.',
+'M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10M3 22v-3a9 9 0 0 1 18 0v3'],
+
+['Settings',
+'Trading configuration preview.',
+'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M10 2h4l1 3 3 1 3 3-2 3 2 3-3 3-3 1-1 3h-4l-1-3-3-1-3-3 2-3-2-3 3-3 3-1z']
+
 ];
 
-const risk=[
+const risk = [
+
 ['Capital ₹',25000],
 ['Risk per trade ₹',600],
 ['Daily max loss ₹',2000],
 ['Max daily trades',3],
 ['Open positions',1],
 ['Minimum score',75]
+
 ];
 
 for(const [name,desc,path] of items){
-const b=document.createElement('button');
-b.className='tile';
-b.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg><span>${name}</span>`;
 
-b.onclick=()=>{
-if(name==='My Account'){
+const b = document.createElement('button');
+
+b.className = 'tile';
+
+b.innerHTML =
+`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg><span>${name}</span>`;
+
+b.onclick = ()=>{
+
+if(name === 'My Account' ||
+name === 'Subscription'){
+
 show('gate');
+checkSubscription();
 return;
+
 }
 
-$('heading').textContent=name;
+$('heading').textContent = name;
+
 $('content').replaceChildren();
 
-const p=document.createElement('p');
-p.textContent=desc;
+const p = document.createElement('p');
+
+p.textContent = desc;
+
 $('content').append(p);
 
-if(name==='Risk Control'||name==='Settings'){
+if(name === 'Risk Control' ||
+name === 'Settings'){
+
 for(const [label,value] of risk){
-const l=document.createElement('label');
-l.textContent=label;
-const input=document.createElement('input');
-input.type='number';
-input.value=value;
-input.disabled=true;
+
+const l = document.createElement('label');
+
+l.textContent = label;
+
+const input = document.createElement('input');
+
+input.type = 'number';
+input.value = value;
+input.disabled = true;
+
 l.append(input);
+
 $('content').append(l);
+
 }
-$('content').append('Naked selling OFF · Auto trading OFF');
+
+$('content').append(
+'Naked selling OFF · Auto trading OFF'
+);
+
 }
+
 show('detail');
+
 };
+
 $('tiles').append(b);
-}
-  const subStatus = document.querySelector('#gate p.note:not(#message)');
-const planText = document.querySelector('#gate h2:last-of-type + p');
 
-planText.style.whiteSpace = 'pre-line';
-planText.textContent =
-'7 Days Free Trial — ₹0\n' +
-'Monthly — ₹499\n' +
-'Quarterly — ₹1,299\n' +
-'Half Yearly — ₹2,499\n' +
-'Yearly — ₹4,499';
-
-let subRequest = 0;
-
-async function checkSubscription(){
-  const request = ++subRequest;
-  const uid = currentUser?.id;
-
-  if(!db || !uid || recovering){
-    subStatus.textContent =
-      'Subscription: Login required';
-    return;
-  }
-
-  subStatus.textContent =
-    'Checking subscription...';
-
-  try{
-    const {data,error} = await db
-      .from('subscriptions')
-      .select('plan,status,valid_until')
-      .eq('user_id',uid)
-      .maybeSingle();
-
-    if(request !== subRequest ||
-       currentUser?.id !== uid) return;
-
-    if(error) throw error;
-
-    if(!data){
-      subStatus.textContent =
-        'Subscription: Not available';
-      return;
-    }
-
-    const expiry = new Date(data.valid_until);
-    const remaining = expiry.getTime() - Date.now();
-
-    if(data.status === 'active' && remaining > 0){
-      const days = Math.ceil(remaining / 86400000);
-
-      subStatus.style.color = '#4ade80';
-      subStatus.style.whiteSpace = 'pre-line';
-      subStatus.textContent =
-        'Subscription: ACTIVE\n' +
-        'Plan: ' + data.plan.toUpperCase() + '\n' +
-        'Remaining: ' + days + ' days\n' +
-        'Valid until: ' +
-        expiry.toLocaleString('en-IN',{
-          timeZone:'Asia/Kolkata'
-        });
-    }else{
-      subStatus.style.color = '#f87171';
-      subStatus.textContent =
-        'Subscription: Inactive / Expired';
-    }
-  }catch(error){
-    if(request !== subRequest) return;
-    subStatus.textContent =
-      'Subscription verification failed';
-  }
 }
 
-if(db){
-  db.auth.onAuthStateChange(()=>{
-    setTimeout(checkSubscription,0);
-  });
-
-  setTimeout(checkSubscription,1000);
-  setInterval(checkSubscription,60000);
-}
 </script>
 </body>
 </html>
-
