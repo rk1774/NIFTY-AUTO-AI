@@ -209,3 +209,46 @@ class AngelMarket:
 
 
 angel_market = AngelMarket()
+
+def get_bulk_quotes(tokens):
+
+    if not isinstance(tokens, list):
+        raise ValueError("Invalid tokens")
+
+    tokens = list(dict.fromkeys(
+        str(t) for t in tokens
+    ))
+
+    if not 1 <= len(tokens) <= 50:
+        raise ValueError("Maximum 50 tokens")
+
+    if not all(
+        t.isascii() and t.isdigit()
+        and len(t) <= 15
+        for t in tokens
+    ):
+        raise ValueError("Invalid token")
+
+    with angel_market.lock:
+
+        client = angel_market.connect()
+
+        response = client.getMarketData(
+            "FULL",
+            {"NSE": tokens}
+        )
+
+        if not response or not response.get("status"):
+            raise RuntimeError(
+                "Stock quotes unavailable"
+            )
+
+        data = response.get("data") or {}
+
+        return {
+            "quotes": data.get("fetched") or [],
+            "unfetched": data.get("unfetched") or [],
+            "received_at": datetime.now(IST).isoformat(),
+            "source": "Angel One",
+            "live_trading": False
+        }
