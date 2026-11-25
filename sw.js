@@ -1,8 +1,7 @@
-const CACHE = 'nifty-auto-ai-v7-gold';
+const CACHE = 'nifty-auto-ai-v8-pro';
 
 const FILES = [
-  './',
-  './index.html',
+  './v8-pro.html',
   './manifest.webmanifest',
   './gold-bull-192.png',
   './gold-bull-512.png'
@@ -32,20 +31,21 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
-  if (new URL(event.request.url).origin !== self.location.origin) return;
+  if (new URL(event.request.url).origin !==
+      self.location.origin) return;
 
   event.respondWith(
     fetch(event.request, { cache: 'no-cache' })
       .catch(async () => {
-        const cached = await caches.match(event.request);
-        if (cached) return cached;
-
         if (event.request.mode === 'navigate') {
-          const page = await caches.match('./index.html');
+          const page = await caches.match(
+            './v8-pro.html'
+          );
           if (page) return page;
         }
 
-        return Response.error();
+        const cached = await caches.match(event.request);
+        return cached || Response.error();
       })
   );
 });
