@@ -322,6 +322,87 @@ show('detail');
 };
 $('tiles').append(b);
 }
+  const subStatus = document.querySelector('#gate p.note:not(#message)');
+const planText = document.querySelector('#gate h2:last-of-type + p');
+
+planText.style.whiteSpace = 'pre-line';
+planText.textContent =
+'7 Days Free Trial — ₹0\n' +
+'Monthly — ₹499\n' +
+'Quarterly — ₹1,299\n' +
+'Half Yearly — ₹2,499\n' +
+'Yearly — ₹4,499';
+
+let subRequest = 0;
+
+async function checkSubscription(){
+  const request = ++subRequest;
+  const uid = currentUser?.id;
+
+  if(!db || !uid || recovering){
+    subStatus.textContent =
+      'Subscription: Login required';
+    return;
+  }
+
+  subStatus.textContent =
+    'Checking subscription...';
+
+  try{
+    const {data,error} = await db
+      .from('subscriptions')
+      .select('plan,status,valid_until')
+      .eq('user_id',uid)
+      .maybeSingle();
+
+    if(request !== subRequest ||
+       currentUser?.id !== uid) return;
+
+    if(error) throw error;
+
+    if(!data){
+      subStatus.textContent =
+        'Subscription: Not available';
+      return;
+    }
+
+    const expiry = new Date(data.valid_until);
+    const remaining = expiry.getTime() - Date.now();
+
+    if(data.status === 'active' && remaining > 0){
+      const days = Math.ceil(remaining / 86400000);
+
+      subStatus.style.color = '#4ade80';
+      subStatus.style.whiteSpace = 'pre-line';
+      subStatus.textContent =
+        'Subscription: ACTIVE\n' +
+        'Plan: ' + data.plan.toUpperCase() + '\n' +
+        'Remaining: ' + days + ' days\n' +
+        'Valid until: ' +
+        expiry.toLocaleString('en-IN',{
+          timeZone:'Asia/Kolkata'
+        });
+    }else{
+      subStatus.style.color = '#f87171';
+      subStatus.textContent =
+        'Subscription: Inactive / Expired';
+    }
+  }catch(error){
+    if(request !== subRequest) return;
+    subStatus.textContent =
+      'Subscription verification failed';
+  }
+}
+
+if(db){
+  db.auth.onAuthStateChange(()=>{
+    setTimeout(checkSubscription,0);
+  });
+
+  setTimeout(checkSubscription,1000);
+  setInterval(checkSubscription,60000);
+}
 </script>
 </body>
 </html>
+
