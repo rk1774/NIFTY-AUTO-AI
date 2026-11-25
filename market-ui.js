@@ -732,3 +732,419 @@
   }
 
 })();
+
+/* NIFTY AUTO AI V8.1 SECURE CONNECTION */
+
+(function () {
+  "use strict";
+
+  const API =
+    "https://nifty-auto-ai.onrender.com";
+
+  const INTERVALS = {
+    "1": "ONE_MINUTE",
+    "3": "THREE_MINUTE",
+    "5": "FIVE_MINUTE",
+    "15": "FIFTEEN_MINUTE",
+    "30": "THIRTY_MINUTE",
+    "60": "ONE_HOUR",
+    "D": "ONE_DAY"
+  };
+
+  const PAGES = [
+    "Options AI",
+    "Stock Scanner",
+    "Live Ranking",
+    "Bullish Stocks",
+    "Bearish Stocks"
+  ];
+
+  let busy = false;
+  let generation = 0;
+  let activeUser = null;
+
+  function visible() {
+    const detail =
+      document.getElementById("detail");
+
+    const heading =
+      document.getElementById("heading");
+
+    return (
+      detail &&
+      !detail.hidden &&
+      heading &&
+      PAGES.includes(
+        heading.textContent.trim()
+      ) &&
+      !document.hidden
+    );
+  }
+
+  function status(message, color) {
+    const root =
+      document.getElementById("market-ui-panel");
+
+    if (!root) return;
+
+    let node =
+      document.getElementById("secure-market-status");
+
+    if (!node) {
+      node = document.createElement("p");
+
+      node.id = "secure-market-status";
+      node.style.padding = "12px";
+      node.style.borderRadius = "10px";
+      node.style.background = "#14243a";
+      node.style.fontWeight = "bold";
+
+      root.prepend(node);
+    }
+
+    node.textContent = message;
+    node.style.color = color || "#e7bd69";
+  }
+
+  async function request(path, token) {
+    const controller = new AbortController();
+
+    const timeout = setTimeout(
+      () => controller.abort(),
+      90000
+    );
+
+    try {
+      const response = await fetch(
+        API + path,
+        {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + token,
+            Accept: "application/json"
+          },
+          cache: "no-store",
+          signal: controller.signal
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Login again");
+        }
+
+        if (response.status === 403) {
+          throw new Error("Owner access required");
+        }
+
+        throw new Error(
+          "Backend error " + response.status
+        );
+      }
+
+      return await response.json();
+
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  function clearMarket() {
+    const candles = {};
+
+    for (const key of Object.keys(INTERVALS)) {
+      candles["NSE:NIFTY|" + key] = [];
+    }
+
+    window.NiftyMarketUI?.update({
+      candles,
+      quotes: [],
+      chain: [],
+      updated: null
+    });
+
+    const panel =
+      document.getElementById("options-ai-panel");
+
+    if (panel) panel.hidden = true;
+  }
+
+  async function refresh() {
+    if (busy || !visible()) return;
+
+    busy = true;
+
+    const run = generation;
+
+    try {
+      if (
+        typeof db === "undefined" ||
+        !db ||
+        typeof currentUser === "undefined" ||
+        !currentUser
+      ) {
+        clearMarket();
+
+        status(
+          "Login required",
+          "#f87171"
+        );
+
+        return;
+      }
+
+      const uid = currentUser.id;
+
+      if (activeUser !== uid) {
+        clearMarket();
+        activeUser = uid;
+      }
+
+      const { data, error } =
+        await db.auth.getSession();
+
+      if (error || !data.session) {
+        throw new Error("Login required");
+      }
+
+      const token =
+        data.session.access_token;
+
+      if (
+        !token ||
+        data.session.user.id !== uid
+      ) {
+        throw new Error("Invalid session");
+      }
+
+      const root =
+        document.getElementById("market-ui-panel");
+
+      const selects =
+        root?.querySelectorAll("select");
+
+      const symbol =
+        selects?.[0]?.value || "NSE:NIFTY";
+
+      const interval =
+        selects?.[1]?.value || "5";
+
+      if (symbol !== "NSE:NIFTY") {
+        status("NIFTY 50 connection only");
+        return;
+      }
+
+      const brokerInterval =
+        INTERVALS[interval] || "FIVE_MINUTE";
+
+      status("Connecting to Angel One...");
+
+      const result = await request(
+        "/app/market/candles?interval=" +
+        encodeURIComponent(brokerInterval) +
+        "&days=10",
+        token
+      );
+
+      if (
+        generation !== run ||
+        currentUser?.id !== uid ||
+        !visible()
+      ) return;
+
+      const latestSelects =
+        document
+          .getElementById("market-ui-panel")
+          ?.querySelectorAll("select");
+
+      if (
+        latestSelects?.[0]?.value !== symbol ||
+        latestSelects?.[1]?.value !== interval
+      ) return;
+
+      if (
+        !Array.isArray(result.candles) ||
+        !result.candles.length
+      ) {
+        throw new Error("No candle data received");
+      }
+
+      const rows = result.candles
+        .map(c => ({
+          time: Date.parse(c.time),
+          open: Number(c.open),
+          high: Number(c.high),
+          low: Number(c.low),
+          close: Number(c.close),
+          volume: Number(c.volume || 0)
+        }))
+        .filter(c =>
+          Object.values(c).every(Number.isFinite) &&
+          c.low > 0 &&
+          c.high >= Math.max(c.open, c.close) &&
+          c.low <= Math.min(c.open, c.close) &&
+          c.time <= Date.now()
+        );
+
+      const unique = [
+        ...new Map(
+          rows.map(c => [c.time, c])
+        ).values()
+      ].sort((a, b) => a.time - b.time);
+
+      if (!unique.length) {
+        throw new Error("Invalid candle data");
+      }
+
+      const last = unique[unique.length - 1];
+
+      window.NiftyMarketUI.update({
+        candles: {
+          ["NSE:NIFTY|" + interval]: unique
+        },
+        updated: new Date().toLocaleString(
+          "en-IN",
+          { timeZone: "Asia/Kolkata" }
+        )
+      });
+
+      status(
+        "CONNECTED | Angel One | " +
+        unique.length +
+        " historical candles | Last candle: " +
+        new Date(last.time).toLocaleString(
+          "en-IN",
+          { timeZone: "Asia/Kolkata" }
+        ),
+        "#4ade80"
+      );
+
+      const panel =
+        document.getElementById("options-ai-panel");
+
+      if (panel) panel.hidden = true;
+
+      if (
+        interval === "5" &&
+        document.getElementById("heading")
+          ?.textContent.trim() === "Options AI"
+      ) {
+        const closed = unique.filter(
+          c => c.time + 300000 <= Date.now()
+        );
+
+        const lastClosed =
+          closed[closed.length - 1];
+
+        if (
+          closed.length >= 200 &&
+          lastClosed &&
+          Date.now() -
+            (lastClosed.time + 300000) <= 600000 &&
+          window.NiftyOptionsUI?.analyze
+        ) {
+          window.NiftyOptionsUI.analyze(closed);
+
+          if (panel) panel.hidden = false;
+
+        } else {
+          status(
+            "CONNECTED | " +
+            unique.length +
+            " historical candles | AI WAIT: " +
+            "Fresh closed candles required",
+            "#e7bd69"
+          );
+        }
+      }
+
+    } catch (error) {
+      if (generation === run) {
+        clearMarket();
+
+        status(
+          "Market connection: " +
+          (error.message || "Unavailable"),
+          "#f87171"
+        );
+      }
+
+    } finally {
+      busy = false;
+    }
+  }
+
+  function init() {
+    const heading =
+      document.getElementById("heading");
+
+    const detail =
+      document.getElementById("detail");
+
+    if (!heading || !detail) return;
+
+    new MutationObserver(() => {
+      setTimeout(refresh, 300);
+    }).observe(heading, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+
+    new MutationObserver(() => {
+      if (visible()) refresh();
+    }).observe(detail, {
+      attributes: true,
+      attributeFilter: ["hidden"]
+    });
+
+    document.addEventListener(
+      "change",
+      event => {
+        if (
+          event.target.closest("#market-ui-panel")
+        ) {
+          setTimeout(refresh, 300);
+        }
+      }
+    );
+
+    if (
+      typeof db !== "undefined" &&
+      db
+    ) {
+      db.auth.onAuthStateChange(
+        (event, session) => {
+          if (
+            event === "SIGNED_OUT" ||
+            session?.user?.id !== activeUser
+          ) {
+            generation++;
+            activeUser = session?.user?.id || null;
+            setTimeout(clearMarket, 0);
+          }
+        }
+      );
+    }
+
+    document.addEventListener(
+      "visibilitychange",
+      refresh
+    );
+
+    setInterval(refresh, 60000);
+
+    refresh();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      init
+    );
+  } else {
+    init();
+  }
+
+})();
+
