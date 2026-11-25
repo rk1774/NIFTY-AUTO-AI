@@ -748,3 +748,236 @@ def app_market_scanner(
                 status_code=503,
                 detail="Stock scanner data unavailable"
             )
+            
+# =================================
+# V8.2 AUTOMATIC NIFTY 50 UNIVERSE
+# =================================
+
+import csv
+import io
+import threading
+import gzip
+
+universe_lock = threading.Lock()
+universe_cache = None
+universe_expiry = 0
+
+NIFTY_LIST_URL = (
+    "https://www.niftyindices.com/"
+    "IndexConstituent/ind_nifty50list.csv"
+)
+
+ANGEL_MASTER_URL = (
+    "https://margincalculator.angelone.in/"
+    "OpenAPI_File/files/OpenAPIScripMaster.json"
+)
+
+
+def download_source(url, limit):
+
+    request = Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "*/*"
+        }
+    )
+
+    with urlopen(request, timeout=45) as response:
+
+        raw = response.read(limit + 1)
+
+        if len(raw) > limit:
+            raise ValueError("Source too large")
+
+        if raw.startswith(b"\x1f\x8b"):
+
+            with gzip.GzipFile(
+                fileobj=io.BytesIO(raw)
+            ) as stream:
+
+                raw = stream.read(limit + 1)
+
+        if len(raw) > limit:
+            raise ValueError("Source too large")
+
+        return raw.decode("utf-8-sig")
+
+
+def load_nifty50_universe():
+
+    global universe_cache
+    global universe_expiry
+
+    with universe_lock:
+
+        now = time.monotonic()
+
+        if (
+            universe_cache is not None
+            and now < universe_expiry
+        ):
+            return universe_cache
+
+        csv_text = download_source(
+            NIFTY_LIST_URL,
+            2000000
+        )
+
+        constituents = list(
+            csv.DictReader(
+                io.StringIO(csv_text)
+            )
+        )
+
+        symbols = {}
+
+        for row in constituents:
+
+            symbol = str(
+                row.get("Symbol") or ""
+            ).strip().upper()
+
+            company = str(
+                row.get("Company Name") or ""
+            ).strip()
+
+            series = str(
+                row.get("Series") or ""
+            ).strip().upper()
+
+            if symbol and series == "EQ":
+                symbols[symbol] = company
+
+        if len(symbols) != 50:
+            raise ValueError(
+                "NIFTY 50 list incomplete"
+            )
+
+        master_text = download_source(
+            ANGEL_MASTER_URL,
+            100000000
+        )
+
+        instruments = json.loads(master_text)
+
+        if not isinstance(instruments, list):
+            raise ValueError(
+                "Invalid instrument master"
+            )
+
+        matched = {}
+
+        for item in instruments:
+
+            exchange = str(
+                item.get("exch_seg") or ""
+            ).upper()
+
+            trading_symbol = str(
+                item.get("symbol") or ""
+            ).upper()
+
+            token = str(
+                item.get("token") or ""
+            )
+
+            if exchange not in (
+                "NSE", "NSE_CM"
+            ):
+                continue
+
+            if not trading_symbol.endswith("-EQ"):
+                continue
+
+            symbol = trading_symbol[:-3]
+
+            if symbol not in symbols:
+                continue
+
+            if (
+                not token.isascii()
+                or not token.isdigit()
+                or len(token) > 15
+            ):
+                continue
+
+            if (
+                symbol in matched
+                and matched[symbol]["token"] != token
+            ):
+                raise ValueError(
+                    "Duplicate instrument mapping"
+                )
+
+            matched[symbol] = {
+                "symbol": symbol,
+                "company": symbols[symbol],
+                "trading_symbol": trading_symbol,
+                "token": token,
+                "exchange": "NSE"
+            }
+
+        missing = sorted(
+            set(symbols) - set(matched)
+        )
+
+        if missing:
+            raise ValueError(
+                "Instrument mapping incomplete"
+            )
+
+        stocks = [
+            matched[symbol]
+            for symbol in sorted(matched)
+        ]
+
+        if len({
+            stock["token"] for stock in stocks
+        }) != 50:
+            raise ValueError(
+                "Duplicate stock tokens"
+            )
+
+        result = {
+            "status": "success",
+            "universe": "NIFTY 50",
+            "count": len(stocks),
+            "stocks": stocks,
+            "tokens": [
+                stock["token"]
+                for stock in stocks
+            ],
+            "source": (
+                "Nifty Indices + Angel One"
+            ),
+            "mode": "READ_ONLY",
+            "live_trading": False,
+            "naked_selling": False
+        }
+
+        universe_cache = result
+        universe_expiry = (
+            time.monotonic() + 21600
+        )
+
+        return result
+
+
+@app.get(
+    "/app/market/universe",
+    dependencies=[Depends(verify_app_user)]
+)
+def app_market_universe():
+
+    try:
+        return load_nifty50_universe()
+
+    except Exception:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Verified NIFTY 50 universe "
+                "currently unavailable"
+            )
+        )
