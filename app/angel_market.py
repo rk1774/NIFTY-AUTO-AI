@@ -94,12 +94,16 @@ class AngelMarket:
             )
 
             if not response or not response.get("status"):
-                raise RuntimeError("Market quote unavailable")
+                raise RuntimeError(
+                    "Market quote unavailable"
+                )
 
             data = response.get("data") or {}
 
             if data.get("ltp") is None:
-                raise RuntimeError("Invalid market quote")
+                raise RuntimeError(
+                    "Invalid market quote"
+                )
 
             return {
                 "exchange": exchange,
@@ -114,7 +118,7 @@ class AngelMarket:
         exchange,
         token,
         interval="FIVE_MINUTE",
-        days=5
+        days=10
     ):
 
         allowed = {
@@ -128,10 +132,14 @@ class AngelMarket:
         }
 
         if interval not in allowed:
-            raise ValueError("Invalid timeframe")
+            raise ValueError(
+                "Invalid timeframe"
+            )
 
-        if not 1 <= days <= 5:
-            raise ValueError("Invalid date range")
+        if not 1 <= days <= 10:
+            raise ValueError(
+                "Invalid date range"
+            )
 
         now = datetime.now(IST)
         start = now - timedelta(days=days)
@@ -140,14 +148,21 @@ class AngelMarket:
             "exchange": exchange,
             "symboltoken": str(token),
             "interval": interval,
-            "fromdate": start.strftime("%Y-%m-%d %H:%M"),
-            "todate": now.strftime("%Y-%m-%d %H:%M")
+            "fromdate": start.strftime(
+                "%Y-%m-%d %H:%M"
+            ),
+            "todate": now.strftime(
+                "%Y-%m-%d %H:%M"
+            )
         }
 
         with self.lock:
 
             client = self.connect()
-            response = client.getCandleData(params)
+
+            response = client.getCandleData(
+                params
+            )
 
             if not response or not response.get("status"):
                 raise RuntimeError(
@@ -178,9 +193,16 @@ class AngelMarket:
 
             try:
                 if self.client is not None:
-                    self.client.terminateSession(
+
+                    response = self.client.terminateSession(
                         os.environ["ANGEL_CLIENT_ID"]
                     )
+
+                    if not response or not response.get("status"):
+                        raise RuntimeError(
+                            "Broker logout not confirmed"
+                        )
+
             finally:
                 self.client = None
                 self.connected_at = None
