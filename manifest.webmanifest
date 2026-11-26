@@ -1,6 +1,7 @@
+
 {
-  "name": "NIFTY AUTO AI",
-  "short_name": "NIFTY AI",
+  "name": "NSE AUTO AI",
+  "short_name": "NSE AUTO AI",
   "id": "./",
   "start_url": "./v8-pro.html",
   "scope": "./",
